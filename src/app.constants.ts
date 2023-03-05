@@ -1,0 +1,2 @@
+export const DATABASE_CONFIG = 'APP.DATABASE_CONFIG'
+export const APP_CONFIG = 'APP.CONFIG'
