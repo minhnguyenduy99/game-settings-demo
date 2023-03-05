@@ -30,7 +30,7 @@
           />
           <el-button size="large" type="primary" @click="saveSettingDialogOpened = true">Add New Setting</el-button>
           <el-button size="large" type="primary" @click="$event => addTagDialogOpened = true">Add Tag</el-button>
-          <el-button size="large" type="primary">Export</el-button>
+          <el-button size="large" type="primary" @click="$event => exportDialogOpened = true">Export</el-button>
           <el-button size="large" type="primary">Import</el-button>
         </div>
       </el-header>
@@ -102,6 +102,13 @@
   >
     <view-setting-history :setting="selectedSetting" />
   </el-dialog>
+  <el-dialog
+    v-model="exportDialogOpened"
+    title="Export setting"
+    destroy-on-close
+  >
+    <export-setting-form />
+  </el-dialog>
 </template>
 
 <script>
@@ -109,6 +116,7 @@ import { ElNotification } from 'element-plus'
 import UploadSettingForm from "../components/UploadSettingForm.vue"
 import ViewSettingHistory from "../components/ViewSettingHistory.vue"
 import AddTagForm from "../components/AddTagForm.vue"
+import ExportSettingForm from "../components/ExportSettingForm.vue"
 import { SettingService } from '../services'
 
 const settingsService = new SettingService()
@@ -118,12 +126,14 @@ export default {
     UploadSettingForm,
     AddTagForm,
     ViewSettingHistory,
+    ExportSettingForm,
   },
   data() {
     return {
       saveSettingDialogOpened: false,
       addTagDialogOpened: false,
       settingHistoryDialogOpened: false,
+      exportDialogOpened: false,
       input: '',
       tableData: [],
       selectedSettingIndex: -1,

@@ -1,3 +1,4 @@
+import writeXlsxFile from 'write-excel-file/node'
 import { BaseFormatter } from './base.formatter'
 
 export class ListFormatter extends BaseFormatter {
@@ -17,5 +18,13 @@ export class ListFormatter extends BaseFormatter {
 			items.push(rowObj)
 		})
 		return items
+	}
+
+	async toFile(setting: any): Promise<Buffer> {
+		const rows = Object.entries(setting)
+		const buffer = await writeXlsxFile(rows, {
+			buffer: true,
+		})
+		return buffer
 	}
 }

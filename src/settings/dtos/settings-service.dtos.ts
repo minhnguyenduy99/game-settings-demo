@@ -28,3 +28,22 @@ export class SettingsDTO {
 	currentVersion: SettingVersionDTO
 	versions: SettingVersionDTO[]
 }
+
+export class TagDTO {
+	id: number
+	name: string
+	settings: SettingOfTagDTO[]
+}
+
+export class SettingOfTagDTO {
+	id: number
+	name: string
+	type: string
+	version: number
+	value: object
+}
+
+export class TagExportDTO {
+	file: Buffer
+	name: string
+}

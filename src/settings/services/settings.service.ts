@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import {
 	AddSettingsDTO,
 	SettingsDTO,
+	TagDTO,
 	TagSettingVersionDTO,
 	UpdateSettingsDTO,
 } from '../dtos/settings-service.dtos'
@@ -14,7 +15,6 @@ import {
 	TagOrmEntity,
 } from '../models'
 import { BaseFormatter, KeyValueFormatter, ListFormatter } from './formatters'
-import e from 'express'
 
 @Injectable()
 export class SettingsService {
@@ -143,6 +143,36 @@ export class SettingsService {
 				tags: version.tags.map((tag) => tag.name),
 			})),
 		}))
+	}
+
+	// write a method to get all settings by tag
+	async getSettingsOfATag(tagName: string): Promise<TagDTO> {
+		const tag = await this.tagRepo.findOne({
+			where: {
+				name: tagName,
+			},
+			relations: ['versions', 'versions.setting'],
+		})
+		if (!tag) {
+			return null
+		}
+		return {
+			id: tag.id,
+			name: tag.name,
+			settings: tag.versions.map((version) => ({
+				id: version.setting.id,
+				name: version.setting.name,
+				type: version.setting.type,
+				value: version.value,
+				version: version.version,
+			})),
+		}
+	}
+
+	// write a method to get all tags
+	async getAllTags(): Promise<string[]> {
+		const tags = await this.tagRepo.find()
+		return tags.map((tag) => tag.name)
 	}
 
 	private getSetting(type: string): BaseFormatter {

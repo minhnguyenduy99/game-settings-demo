@@ -91,4 +91,58 @@ export class SettingService {
             throw new Error('Something went wrong')
         })
     }
+
+    // write a method to get all tags
+    async getAllTags() {
+        return await fetch(`${BASE_API_URL}/api/tags`).then(response => response.json()).then((responseBody) => {
+            if (responseBody.code === 'SUCCESS') {
+                return responseBody.data
+            } else {
+                throw new Error(responseBody.message)
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            throw new Error('Something went wrong')
+        })
+    }
+
+    // write a method to get tag by name
+    async getTagByName(name) {
+        return await fetch(`${BASE_API_URL}/api/tags/${name}`).then(response => response.json()).then((responseBody) => {
+            if (responseBody.code === 'SUCCESS') {
+                return responseBody.data
+            } else {
+                throw new Error(responseBody.message)
+            }
+        })
+        .catch(err => {
+            console.log(err)
+            throw new Error('Something went wrong')
+        })
+    }
+
+    // write a method to download setting file by tag name
+    async downloadSettingFileByTagName(name) {
+        return await fetch(`${BASE_API_URL}/api/tags/${name}/export`).then(async response => {
+            if (response.status !== 200) {
+                const body = await response.json()
+                throw new Error(body.message)
+            }
+            const settingFile = await response.blob()
+            // get file name from response header
+            const fileName = response.headers.get('Content-Disposition').split('filename=')[1]
+            console.log(fileName)
+            // download settingFile
+            const url = window.URL.createObjectURL(new Blob([settingFile]))
+            const link = document.createElement('a')
+            link.href = url
+            link.download = fileName
+            link.click()
+        })
+        .catch(err => {
+            console.log(err)
+            throw new Error('Something went wrong')
+        })
+    }
 }

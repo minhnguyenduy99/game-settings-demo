@@ -7,6 +7,7 @@ import {
 	SettingVersionOrmEntity,
 	TagOrmEntity,
 } from './models'
+import { ExportService } from './services/export.service'
 import { SettingsService } from './services/settings.service'
 
 @Module({
@@ -18,7 +19,7 @@ import { SettingsService } from './services/settings.service'
 			TagOrmEntity,
 		]),
 	],
-	providers: [SettingsService],
+	providers: [SettingsService, ExportService],
 	controllers: [SettingsController, TagController],
 })
 export class SettingsModule {}

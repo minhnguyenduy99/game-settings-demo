@@ -7,4 +7,5 @@ export abstract class BaseFormatter {
 	}
 
 	abstract format(file: Buffer): Promise<any>
+	abstract toFile(setting: any): Promise<Buffer>
 }
