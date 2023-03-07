@@ -31,7 +31,7 @@
           <el-button size="large" type="primary" @click="saveSettingDialogOpened = true">Add New Setting</el-button>
           <el-button size="large" type="primary" @click="$event => addTagDialogOpened = true">Add Tag</el-button>
           <el-button size="large" type="primary" @click="$event => exportDialogOpened = true">Export</el-button>
-          <el-button size="large" type="primary">Import</el-button>
+          <el-button size="large" type="primary" @click="$event => importSettingDialogOpened = true">Import</el-button>
         </div>
       </el-header>
 
@@ -69,9 +69,7 @@
               <el-table-column fixed="right" label="Operations" width="150">
                 <template #default="scope">
                   <div class="button-group">
-                    <el-button icon="Upload" circle type="primary" @click="$openUploadSettingForm(scope.$index)" />
                     <el-button icon="List" circle type="primary" @click="$openSettingHistoryDialog(scope.$index)" />
-                    <el-button icon="Delete" circle type="danger" />
                   </div>
                 </template>
               </el-table-column>
@@ -109,6 +107,13 @@
   >
     <export-setting-form />
   </el-dialog>
+  <el-dialog
+    v-model="importSettingDialogOpened"
+    title="Import setting"
+    destroy-on-close
+  >
+    <import-setting-form @submit="$importSetting" />
+  </el-dialog>
 </template>
 
 <script>
@@ -117,6 +122,7 @@ import UploadSettingForm from "../components/UploadSettingForm.vue"
 import ViewSettingHistory from "../components/ViewSettingHistory.vue"
 import AddTagForm from "../components/AddTagForm.vue"
 import ExportSettingForm from "../components/ExportSettingForm.vue"
+import ImportSettingForm from "../components/ImportSettingForm.vue"
 import { SettingService } from '../services'
 
 const settingsService = new SettingService()
@@ -127,6 +133,7 @@ export default {
     AddTagForm,
     ViewSettingHistory,
     ExportSettingForm,
+    ImportSettingForm,
   },
   data() {
     return {
@@ -134,6 +141,7 @@ export default {
       addTagDialogOpened: false,
       settingHistoryDialogOpened: false,
       exportDialogOpened: false,
+      importSettingDialogOpened: false,
       input: '',
       tableData: [],
       selectedSettingIndex: -1,
@@ -192,6 +200,25 @@ export default {
         ElNotification({
           title: 'Success',
           message: 'Add tag successfully',
+          type: 'success',
+        })
+      }).catch(error => {
+        const message = error.message
+        ElNotification({
+          title: 'Error',
+          message,
+          type: 'error',
+        })
+      })
+    },
+    $importSetting(data) {
+      const { file } = data
+      settingsService.importSetting(file).then(() => {
+        this.importSettingDialogOpened = false
+        this.$refreshTableData()
+        ElNotification({
+          title: 'Success',
+          message: 'Import setting successfully',
           type: 'success',
         })
       }).catch(error => {

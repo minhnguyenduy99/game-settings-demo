@@ -46,3 +46,8 @@ export class TagExportDTO {
 	file: Buffer
 	name: string
 }
+
+export class UploadSettingByTagDTO {
+	tag: string
+	settings: AddSettingsDTO[]
+}

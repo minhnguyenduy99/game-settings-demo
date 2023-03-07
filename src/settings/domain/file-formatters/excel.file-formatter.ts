@@ -23,6 +23,7 @@ export class ExcelFileFormatter implements IFileFormatter {
 				value: type,
 			},
 		]
+		console.log(settings)
 		const rows = settings.map((entry) =>
 			entry.map((cell) => ({ value: cell })),
 		)

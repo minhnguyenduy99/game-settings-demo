@@ -5,6 +5,7 @@ import { SettingOfTagDTO, TagExportDTO } from '../dtos/settings-service.dtos'
 import { SettingsService } from './settings.service'
 import * as fs from 'fs'
 import { promisify } from 'util'
+import { extractFileName } from '../utils/extract-file-name.utils'
 
 const writeFile = promisify(fs.writeFile)
 const mkdir = promisify(fs.mkdir)
@@ -42,12 +43,45 @@ export class ExportService {
 		}
 	}
 
+	async importSettings(dto: TagExportDTO) {
+		const { file, name } = dto
+		const zip = new AdmZip(file)
+		const zipEntries = zip.getEntries()
+		const settings = await Promise.all(
+			zipEntries.map(async (entry) => {
+				const fileName = extractFileName(entry.entryName, '.xlsx')
+				const fileData = await new Promise((resolve, reject) => {
+					entry.getDataAsync((data, err) => {
+						if (err) {
+							return reject(err)
+						}
+						resolve(data)
+					})
+				})
+				return {
+					name: fileName,
+					file: fileData,
+				}
+			}),
+		)
+		const tagName = name.split('setting_')[1]
+		if (!tagName) {
+			throw new Error('Tag name not found')
+		}
+		await this.settingService.uploadSettingsByTag({
+			tag: tagName,
+			settings: settings as any[],
+		})
+	}
+
 	private async exportSettingToExcel(
 		setting: SettingOfTagDTO,
 		exportPath: string,
 	) {
-		const formatter = SettingsService.FORMATTERS[setting.type]
-		const buffer = await formatter.toFile(setting.value)
+		const buffer = await this.settingService.convertSettingToExcel({
+			type: setting.type,
+			settings: setting.value,
+		})
 		await writeFile(`${exportPath}/${setting.name}.xlsx`, buffer)
 	}
 }

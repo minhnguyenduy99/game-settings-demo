@@ -1,5 +1,8 @@
 import { ExcelFileFormatter } from './file-formatters/excel.file-formatter'
-import { GameSetting } from './setting-formatters/base.formatter'
+import {
+	GameSetting,
+	IGameSettingFormatter,
+} from './setting-formatters/base.formatter'
 import { KeyValueFormatter } from './setting-formatters/key-value.formatter'
 
 const GAME_SETTING_TYPES = {
@@ -17,5 +20,17 @@ export class GameSettingService {
 			}
 		}
 		return null
+	}
+
+	async convertToExcel(gameSetting: GameSetting) {
+		const fileFormatter = new ExcelFileFormatter()
+		let formatter: IGameSettingFormatter
+		switch (gameSetting.type) {
+			case GAME_SETTING_TYPES.keyValue:
+				formatter = new KeyValueFormatter()
+		}
+		const rawSetting = await formatter.toRawSetting(gameSetting)
+		const file = await fileFormatter.toFile(rawSetting)
+		return file
 	}
 }

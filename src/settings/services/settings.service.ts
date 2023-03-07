@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, In, Repository } from 'typeorm'
+import { DataSource, EntityManager, In, Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import {
 	AddSettingsDTO,
@@ -7,6 +7,7 @@ import {
 	TagDTO,
 	TagSettingVersionDTO,
 	UpdateSettingsDTO,
+	UploadSettingByTagDTO,
 } from '../dtos/settings-service.dtos'
 import {
 	ReadonlySettingOrmEntity,
@@ -14,16 +15,10 @@ import {
 	SettingVersionOrmEntity,
 	TagOrmEntity,
 } from '../models'
-import { BaseFormatter, KeyValueFormatter, ListFormatter } from './formatters'
-import { GameSettingService } from '../domain'
+import { GameSetting, GameSettingService } from '../domain'
 
 @Injectable()
 export class SettingsService {
-	static FORMATTERS = {
-		key_value: new KeyValueFormatter(),
-		list: new ListFormatter(),
-	}
-
 	constructor(
 		@InjectRepository(SettingOrmEntity)
 		private readonly settingRepo: Repository<SettingOrmEntity>,
@@ -36,6 +31,10 @@ export class SettingsService {
 		private readonly dataSource: DataSource,
 		private readonly gameSettingService: GameSettingService,
 	) {}
+
+	async convertSettingToExcel(setting: GameSetting) {
+		return this.gameSettingService.convertToExcel(setting)
+	}
 
 	async uploadSetting(dto: AddSettingsDTO) {
 		const { name, file } = dto
@@ -88,6 +87,17 @@ export class SettingsService {
 			setting.currentVersion = settingVersion
 
 			await settingRepo.save(setting)
+		})
+	}
+
+	async uploadSettingsByTag(dto: UploadSettingByTagDTO) {
+		const { tag, settings } = dto
+		await Promise.all(
+			settings.map((setting) => this.uploadSetting(setting)),
+		)
+		await this.tagSettingVersion({
+			name: tag,
+			versionIds: 'all',
 		})
 	}
 
@@ -180,9 +190,5 @@ export class SettingsService {
 	async getAllTags(): Promise<string[]> {
 		const tags = await this.tagRepo.find()
 		return tags.map((tag) => tag.name)
-	}
-
-	private getSetting(type: string): BaseFormatter {
-		return SettingsService.FORMATTERS[type]
 	}
 }

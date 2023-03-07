@@ -122,7 +122,7 @@ export class SettingService {
 
     // write a method to download setting file by tag name
     async downloadSettingFileByTagName(name) {
-        return await fetch(`${BASE_API_URL}/api/tags/${name}/export`).then(async response => {
+        return await fetch(`${BASE_API_URL}/api/settings/export?tag=${name}`).then(async response => {
             if (response.status !== 200) {
                 const body = await response.json()
                 throw new Error(body.message)
@@ -137,6 +137,29 @@ export class SettingService {
             link.href = url
             link.download = fileName
             link.click()
+        })
+        .catch(err => {
+            console.log(err)
+            throw new Error('Something went wrong')
+        })
+    }
+
+    async importSetting(zipFile) {
+        const formData = new FormData()
+        formData.append('file', zipFile)
+        return await fetch(`${BASE_API_URL}/api/settings/import`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                contentType: 'multipart/form-data'
+            }
+        })
+        .then(response => response.json()).then((responseBody) => {
+            if (responseBody.code === 'SUCCESS') {
+                return responseBody.data
+            } else {
+                throw new Error(responseBody.message)
+            }
         })
         .catch(err => {
             console.log(err)
