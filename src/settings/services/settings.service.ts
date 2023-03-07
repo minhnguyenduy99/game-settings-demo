@@ -15,6 +15,7 @@ import {
 	TagOrmEntity,
 } from '../models'
 import { BaseFormatter, KeyValueFormatter, ListFormatter } from './formatters'
+import { GameSettingService } from '../domain'
 
 @Injectable()
 export class SettingsService {
@@ -33,15 +34,15 @@ export class SettingsService {
 		@InjectRepository(TagOrmEntity)
 		private readonly tagRepo: Repository<TagOrmEntity>,
 		private readonly dataSource: DataSource,
+		private readonly gameSettingService: GameSettingService,
 	) {}
 
 	async uploadSetting(dto: AddSettingsDTO) {
-		const { name, type, file } = dto
-		const formatter = this.getSetting(type)
-		if (!formatter) {
-			throw new Error('Invalid setting type')
+		const { name, file } = dto
+		const gameSetting = await this.gameSettingService.formatFromExcel(file)
+		if (!gameSetting) {
+			throw new Error('Invalid setting file')
 		}
-		const settingData = await formatter.format(file.buffer)
 		const existingSetting = await this.settingRepo.findOne({
 			relations: ['currentVersion'],
 			where: {
@@ -49,9 +50,15 @@ export class SettingsService {
 			},
 		})
 		if (existingSetting) {
+			if (existingSetting.type !== gameSetting.type) {
+				throw new Error(
+					'Setting type mismatched. Type must be ' +
+						existingSetting.type,
+				)
+			}
 			const newCurrentVersion = new SettingVersionOrmEntity()
 			newCurrentVersion.tags = []
-			newCurrentVersion.value = settingData
+			newCurrentVersion.value = gameSetting.settings
 			newCurrentVersion.version =
 				existingSetting.currentVersion.version + 1
 			newCurrentVersion.settingId = existingSetting.id
@@ -65,7 +72,7 @@ export class SettingsService {
 
 		const setting = new SettingOrmEntity()
 		setting.name = name
-		setting.type = type
+		setting.type = gameSetting.type
 
 		await this.dataSource.transaction(async (manager) => {
 			const settingRepo = manager.getRepository(SettingOrmEntity)
@@ -74,7 +81,7 @@ export class SettingsService {
 			// save setting version
 			const settingVersion = new SettingVersionOrmEntity()
 			settingVersion.version = 1
-			settingVersion.value = settingData
+			settingVersion.value = gameSetting.settings
 			settingVersion.tags = []
 			settingVersion.settingId = setting.id
 

@@ -86,7 +86,7 @@
     title="Upload setting"
     destroy-on-close
   >
-    <upload-setting-form :setting="selectedSetting" @submit="$saveSetting" />
+    <upload-setting-form @submit="$saveSetting" />
   </el-dialog>
   <el-dialog
     v-model="addTagDialogOpened"
@@ -166,8 +166,8 @@ export default {
   },
   methods: {
     $saveSetting(data) {
-      const { name, type, file } = data
-      settingsService.saveSetting(name, type, file).then(() => {
+      const { file } = data
+      settingsService.saveSetting(file).then(() => {
         this.saveSettingDialogOpened = false
         this.$refreshTableData()
         ElNotification({

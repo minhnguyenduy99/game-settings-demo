@@ -8,7 +8,6 @@ import {
 	UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { AddSettingsDTO } from '../dtos/settings-service.dtos'
 import { SettingsService } from '../services/settings.service'
 
 @Controller('settings')
@@ -17,13 +16,13 @@ export class SettingsController {
 
 	@Post()
 	@UseInterceptors(FileInterceptor('file'))
-	async addNewSetting(
-		@UploadedFile() file: any,
-		@Body() settings: AddSettingsDTO,
-	) {
+	async addNewSetting(@UploadedFile() file: Express.Multer.File) {
+		const fileNameParts = file.originalname.split('.')
+		fileNameParts.pop()
+		const fileName = fileNameParts.join('.')
 		await this.settingsService.uploadSetting({
-			...settings,
-			file: file,
+			name: fileName,
+			file: file.buffer,
 		})
 		return {
 			code: 'SUCCESS',

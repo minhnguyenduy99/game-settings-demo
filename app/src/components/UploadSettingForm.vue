@@ -1,15 +1,6 @@
 <template>
   <div id="new-setting-form">
     <el-form label-width="100px">
-      <el-form-item label="Name">
-        <el-input :disabled="formDisabled" v-model="formData.name"></el-input>
-      </el-form-item>
-      <el-form-item label="Setting Type">
-        <el-select :disabled="formDisabled" v-model="formData.type" placeholder="Setting Type">
-          <el-option label="Key Value" value="key_value" />
-          <el-option label="List" value="list" />
-        </el-select>
-      </el-form-item>
       <el-form-item label="File">
         <div>
           <el-upload
@@ -40,30 +31,12 @@
 <script>
 export default {
   name: 'UploadSettingForm',
-  props: {
-    setting: {
-      type: Object,
-      default: () => null,
-    },
-  },
   data() {
     return {
       formData: {
-        name: '',
-        type: null,
         file: null,
       },
-      formDisabled: false,
     }
-  },
-  created: function() {
-    if (this.setting) {
-      this.formData.name = this.setting.name
-      this.formData.type = this.setting.type
-    }
-  },
-  mounted: function() {
-    this.formDisabled = this.setting ? true : false
   },
   methods: {
     $onSubmit() {

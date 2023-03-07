@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { SettingsController, TagController } from './controllers'
+import { GameSettingService } from './domain'
 import {
 	ReadonlySettingOrmEntity,
 	SettingOrmEntity,
@@ -19,7 +20,7 @@ import { SettingsService } from './services/settings.service'
 			TagOrmEntity,
 		]),
 	],
-	providers: [SettingsService, ExportService],
+	providers: [SettingsService, ExportService, GameSettingService],
 	controllers: [SettingsController, TagController],
 })
 export class SettingsModule {}

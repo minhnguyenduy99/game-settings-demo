@@ -2,11 +2,9 @@
 const BASE_API_URL = import.meta.env.VITE_API_BASE_URL
 
 export class SettingService {
-    async saveSetting(name, type, file) {
+    async saveSetting(file) {
         // create a form data in javascript
         let formData = new FormData();
-        formData.append('name', name);
-        formData.append('type', type);
         formData.append('file', file);
 
         // create a fetch request with method post and content type of form data

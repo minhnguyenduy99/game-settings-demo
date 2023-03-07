@@ -1,7 +1,6 @@
 export class AddSettingsDTO {
 	name: string
-	type: string
-	file?: Express.Multer.File
+	file: Buffer
 }
 
 export class UpdateSettingsDTO {
