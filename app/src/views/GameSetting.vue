@@ -1,119 +1,106 @@
 
 
 <template>
-  <el-container class="layout-container-demo">
-    <el-aside>
-      <el-scrollbar>
-        <el-menu :default-openeds="['1']">
-          <el-sub-menu index="1">
-            <template #title>
-              <el-icon><Collection /></el-icon>Game Design
-            </template>
-            <el-menu-item index="1-2">
-              <el-icon><set-up /></el-icon>Game Settings
-            </el-menu-item>
-          </el-sub-menu>
-        </el-menu>
-      </el-scrollbar>
-    </el-aside>
-
+  <div class="layout-container-demo">
     <el-container>
-      <el-header>
-        <div class="toolbar">
-          <el-input
-            class="mr-4"
-            v-model="input"
-            size="large"
-            placeholder="Search for settings"
-            suffix-icon="Search"
-            style="margin-right: 10px"
-          />
-          <el-button size="large" type="primary" @click="saveSettingDialogOpened = true">Add New Setting</el-button>
-          <el-button size="large" type="primary" @click="$event => addTagDialogOpened = true">Add Tag</el-button>
-          <el-button size="large" type="primary" @click="$event => exportDialogOpened = true">Export</el-button>
-          <el-button size="large" type="primary" @click="$event => importSettingDialogOpened = true">Import</el-button>
-        </div>
-      </el-header>
-
-
-      <el-main>
-        <el-scrollbar>
-          <div style="padding: 10px;">
-            <el-table :data="tableData">
-              <el-table-column prop="name" label="Name" width="140" />
-              <el-table-column prop="type" label="Type" width="100" />
-              <el-table-column prop="currentVersion" label="Current Version" width="140" align="center">
-                <template #default="scope">
-                  <div>
-                    <p class="text-primary">{{ scope.row.currentVersion.version }}</p>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column prop="currentVersion" label="Tags">
-                <template #default="scope">
-                  <div>
-                    <el-space v-if="scope.row.currentVersion.tags.length > 0">
-                      <el-tag
-                        v-for="tag in scope.row.currentVersion.tags" :key="tag.id"
-                        type="success"
-                        disable-transitions
-                        class="ml-2"
-                        effect="dark"
-                        >{{ tag }}</el-tag
-                      >
-                    </el-space>
-                    <p v-else class="text-primary">No tags</p>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column fixed="right" label="Operations" width="150">
-                <template #default="scope">
-                  <div class="button-group">
-                    <el-button icon="List" circle type="primary" @click="$openSettingHistoryDialog(scope.$index)" />
-                  </div>
-                </template>
-              </el-table-column>
-            </el-table>
+      <el-container>
+        <el-header>
+          <div class="toolbar">
+            <el-input
+              class="mr-4"
+              v-model="input"
+              size="large"
+              placeholder="Search for settings"
+              suffix-icon="Search"
+              style="margin-right: 10px"
+            />
+            <el-button size="large" type="primary" @click="saveSettingDialogOpened = true">Add New Setting</el-button>
+            <el-button size="large" type="primary" @click="$event => addTagDialogOpened = true">Add Tag</el-button>
+            <el-button size="large" type="primary" @click="$event => exportDialogOpened = true">Export</el-button>
+            <el-button size="large" type="primary" @click="$event => importSettingDialogOpened = true">Import</el-button>
           </div>
-        </el-scrollbar>
-      </el-main>
+        </el-header>
+
+
+        <el-main>
+          <el-scrollbar>
+            <div style="padding: 10px;">
+              <el-table :data="tableData">
+                <el-table-column prop="name" label="Name" width="140" />
+                <el-table-column prop="type" label="Type" width="100" />
+                <el-table-column prop="currentVersion" label="Current Version" width="140" align="center">
+                  <template #default="scope">
+                    <div>
+                      <p class="text-primary">{{ scope.row.currentVersion.version }}</p>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="currentVersion" label="Tags">
+                  <template #default="scope">
+                    <div>
+                      <el-space v-if="scope.row.currentVersion.tags.length > 0">
+                        <el-tag
+                          v-for="tag in scope.row.currentVersion.tags" :key="tag.id"
+                          type="success"
+                          disable-transitions
+                          class="ml-2"
+                          effect="dark"
+                          >{{ tag }}</el-tag
+                        >
+                      </el-space>
+                      <p v-else class="text-primary">No tags</p>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column fixed="right" label="Operations" width="150">
+                  <template #default="scope">
+                    <div class="button-group">
+                      <el-button icon="List" circle type="primary" @click="$openSettingHistoryDialog(scope.$index)" />
+                    </div>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </el-scrollbar>
+        </el-main>
+      </el-container>
     </el-container>
-  </el-container>
-  <el-dialog
-    v-model="saveSettingDialogOpened"
-    title="Upload setting"
-    destroy-on-close
-  >
-    <upload-setting-form @submit="$saveSetting" />
-  </el-dialog>
-  <el-dialog
-    v-model="addTagDialogOpened"
-    title="Add new tag"
-    destroy-on-close
-  >
-    <add-tag-form :setting="selectedSetting" @submit="$addTagForSetting" />
-  </el-dialog>
-  <el-dialog
-    v-model="settingHistoryDialogOpened"
-    title="Setting history"
-    destroy-on-close
-  >
-    <view-setting-history :setting="selectedSetting" />
-  </el-dialog>
-  <el-dialog
-    v-model="exportDialogOpened"
-    title="Export setting"
-    destroy-on-close
-  >
-    <export-setting-form />
-  </el-dialog>
-  <el-dialog
-    v-model="importSettingDialogOpened"
-    title="Import setting"
-    destroy-on-close
-  >
-    <import-setting-form @submit="$importSetting" />
-  </el-dialog>
+    <el-dialog
+      v-model="saveSettingDialogOpened"
+      title="Upload setting"
+      destroy-on-close
+    >
+      <upload-setting-form @submit="$saveSetting" />
+    </el-dialog>
+    <el-dialog
+      v-model="addTagDialogOpened"
+      title="Add new tag"
+      destroy-on-close
+    >
+      <add-tag-form :setting="selectedSetting" @submit="$addTagForSetting" />
+    </el-dialog>
+    <el-dialog
+      v-model="settingHistoryDialogOpened"
+      title="Setting history"
+      destroy-on-close
+    >
+      <view-setting-history :setting="selectedSetting" />
+    </el-dialog>
+    <el-dialog
+      v-model="exportDialogOpened"
+      title="Export setting"
+      destroy-on-close
+    >
+      <export-setting-form />
+    </el-dialog>
+    <el-dialog
+      v-model="importSettingDialogOpened"
+      title="Import setting"
+      destroy-on-close
+    >
+      <import-setting-form @submit="$importSetting" />
+    </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -128,6 +115,7 @@ import { SettingService } from '../services'
 const settingsService = new SettingService()
 
 export default {
+  name: 'GameSetting',
   components: {
     UploadSettingForm,
     AddTagForm,
