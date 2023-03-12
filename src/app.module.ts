@@ -6,6 +6,7 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { SettingsModule } from './settings'
 import appConfig from './app.config'
+import { ApiDocsModule } from './apidocs'
 
 @Module({
 	imports: [
@@ -22,6 +23,7 @@ import appConfig from './app.config'
 
 		// feature modules
 		SettingsModule,
+		ApiDocsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
